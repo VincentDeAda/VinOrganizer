@@ -10,6 +10,7 @@ public class SQLiteDatabase : DbContext
     public DbSet<ExtensionPack> ExtensionPacks { get; set; } = null!;
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        optionsBuilder.UseLazyLoadingProxies();
         string connectionStringDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VDA", "VinOrg");
         string connectionString = Path.Combine(connectionStringDir, "extensions.db");
 
@@ -20,13 +21,11 @@ public class SQLiteDatabase : DbContext
     {
         modelBuilder.Entity<ExtensionPack>(x =>
         {
-            x.HasKey(x => x.Id);
             x.Property(x => x.Id).ValueGeneratedOnAdd();
             x.HasIndex(x => x.Name).IsUnique();
         });
         modelBuilder.Entity<Extension>(x =>
         {
-            x.HasKey(x => x.Id);
             x.HasOne(x => x.ExtensionPack).WithMany(x => x.Extensions);
             x.Property(x => x.Id).ValueGeneratedOnAdd();
         });

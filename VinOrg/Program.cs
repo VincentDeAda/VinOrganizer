@@ -14,10 +14,8 @@ var app = builder.Build();
 app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
 {
     db.Database.EnsureCreated();
-
     await db.ExtensionPacks.ForEachAsync(x =>
     {
-
         x.Path = x.Path ?? "./";
         Console.WriteLine("{0,-12}{1,5}", x.Name, x.Path);
         foreach (var ext in x.Extensions)
@@ -57,7 +55,6 @@ app.AddCommand("add", async ([FromService] SQLiteDatabase db, [Argument] List<st
         {
             existingExtensions.ForEach(x => x.ExtensionPack = pack);
             db.Extensions.UpdateRange(existingExtensions);
-
 
         }
 
