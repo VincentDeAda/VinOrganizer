@@ -109,12 +109,22 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
         var packName = db.Extensions.FirstOrDefault(x => x.ExtensionName == ext.Key.Substring(1))?.ExtensionPack;
         if (packName is not null)
         {
-            Console.WriteLine(packName.Name);
-            var newDir = Path.Combine(currentDir, packName.Name);
-            Console.WriteLine(newDir);
-            if (Directory.Exists(newDir) == false)
+            var newDir = Path.Combine(packName.Path ?? currentDir, packName.Name);
+            if (!Directory.Exists(newDir))
                 Directory.CreateDirectory(newDir);
-            ext.ToList().ForEach(x => x.MoveTo(newDir));
+
+            ext.ToList().ForEach(x =>
+            {
+                try
+                {
+                    x.MoveTo(Path.Combine(newDir, x.Name));
+                }
+                catch (Exception)
+                {
+
+                    Console.WriteLine("Couldn't Move File: {0}", x.FullName);
+                }
+            });
         }
     }
 
