@@ -22,13 +22,14 @@ app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
         Console.WriteLine("{0,-12}{1,5}", x.Name, x.Path);
         foreach (var ext in x.Extensions)
             Console.WriteLine("{0,17}", ext.ExtensionName);
+        Console.WriteLine();
     });
 });
 app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument] string packName) =>
 {
     db.Database.EnsureCreated();
-
-    var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x.ToLower(), "[a-z0-9]"));
+    extensions = extensions.Select(x => x.ToLower()).ToList();
+    var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x,"[a-z0-9]"));
     if (invalidExtensions.Any())
     {
         Console.WriteLine("The Following Provided Extensions are Invalid: ");
@@ -43,9 +44,8 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
         pack = new ExtensionPack { Name = packName };
         isNew = true;
     }
-    var existingExtensions = db.Extensions.Where(x => extensions.Contains(x.ExtensionName)).ToList();
-    var extList = existingExtensions.ToList();
-    if (extList.Count > 0)
+    var existingExtensions = db.Extensions.Where(x => extensions.Contains(x.ExtensionName) && !pack.Extensions.Contains(x)).ToList();
+    if (existingExtensions.Count > 0)
     {
         existingExtensions.ForEach(x => extensions.Remove(x.ExtensionName));
         Console.WriteLine(existingExtensions.Count);
