@@ -75,19 +75,45 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
         db.Update(pack);
     db.SaveChanges();
 });
-app.AddSubCommand("set", x =>
+
+
+app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packName, [Option('p')] string? newPath, [Option('n')] string? newName, [Option('y')] bool confirm) =>
+{
+    var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
+    if (pack is null)
+    {
+        Console.WriteLine("The Provided Pack Name Doesn't Exist.");
+        return;
+    }
+    if (newName is not null)
+    {
+        if(db.ExtensionPacks.FirstOrDefault(x=>x.Name==newName)is not null)
+        {
+            Console.WriteLine("Pack Name Already Used");
+            return;
+        }
+        pack.Name = newName;
+    }
+    if (newPath is not null)
 {
 
-    x.AddCommand("path", ([FromService] SQLiteDatabase db, [Argument] string path) =>
+        bool isValidPath = Path.IsPathFullyQualified(newPath);
+
+        if (!isValidPath)
+            Console.WriteLine("Invalid Path");
+        else
     {
-        try
+            var absPath = Path.GetFullPath(newPath);
+            if (!confirm)
         {
-            Console.WriteLine(Path.IsPathRooted(path));
-            Console.WriteLine(Path.GetFullPath(path));
+                Console.Write("Press [Y] to confirm updating the path for {0} to {1}. : ", pack.Name, absPath);
+                var k = Console.ReadKey();
+                if (k.Key != ConsoleKey.Y)
+                    return;
+            }
+            pack.Path = absPath;
         }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
+
         }
 
     });
