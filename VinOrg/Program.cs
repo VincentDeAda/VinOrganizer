@@ -29,7 +29,7 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
 {
     db.Database.EnsureCreated();
     extensions = extensions.Select(x => x.ToLower()).ToList();
-    var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x,"[a-z0-9]"));
+    var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x, "[a-z0-9]"));
     if (invalidExtensions.Any())
     {
         Console.WriteLine("The Following Provided Extensions are Invalid: ");
