@@ -28,6 +28,8 @@ app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
 app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument] string packName) =>
 {
     db.Database.EnsureCreated();
+
+
     extensions = extensions.Select(x => x.ToLower()).ToList();
     var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x, "[a-z0-9]"));
     if (invalidExtensions.Any())
@@ -37,6 +39,7 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
             Console.WriteLine(ext);
         return;
     }
+
     var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
     bool isNew = false;
     if (pack is null)
@@ -48,7 +51,6 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
     if (existingExtensions.Count > 0)
     {
         existingExtensions.ForEach(x => extensions.Remove(x.ExtensionName));
-        Console.WriteLine(existingExtensions.Count);
         Console.WriteLine("The Following Extensions Already Exist on Other Extension Group:");
         existingExtensions.ForEach(x => Console.WriteLine(x.ExtensionName));
         Console.Write("Press [Y] to confirm moving, or any other key to ignore: ");
@@ -95,17 +97,17 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packNa
         pack.Name = newName;
     }
     if (newPath is not null)
-{
+    {
 
         bool isValidPath = Path.IsPathFullyQualified(newPath);
 
         if (!isValidPath)
             Console.WriteLine("Invalid Path");
         else
-    {
+        {
             var absPath = Path.GetFullPath(newPath);
             if (!confirm)
-        {
+            {
                 Console.Write("Press [Y] to confirm updating the path for {0} to {1}. : ", pack.Name, absPath);
                 var k = Console.ReadKey();
                 if (k.Key != ConsoleKey.Y)
@@ -114,10 +116,15 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packNa
             pack.Path = absPath;
         }
 
-        }
+    }
 
-    });
+
+
+    db.Update(pack);
+    db.SaveChanges();
+
 });
+
 app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
@@ -128,7 +135,7 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
                      RecurseSubdirectories = recurisve,
                  }).Select(x => new FileInfo(x)).ToList();
 
-    var groupedFiles = files.GroupBy(x => x.Extension);
+    var groupedFiles = files.GroupBy(x => x.Extension.ToLower());
 
     foreach (var ext in groupedFiles)
     {
@@ -137,7 +144,17 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
         {
             var newDir = Path.Combine(packName.Path ?? currentDir, packName.Name);
             if (!Directory.Exists(newDir))
-                Directory.CreateDirectory(newDir);
+                try
+                {
+                    Directory.CreateDirectory(newDir);
+                }
+                catch (Exception e)
+                {
+
+                    Console.WriteLine("Failed To Create {0}",newDir);
+                    Console.WriteLine("Error Message:\n{0}", e.Message);
+                    continue;
+                }
 
             ext.ToList().ForEach(x =>
             {
