@@ -78,9 +78,47 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
     db.SaveChanges();
 });
 
+app.AddSubCommand("remove", x =>
+{
+
+    x.AddCommand("pack", ([FromService] SQLiteDatabase db, [Argument] string packName) =>
+    {
+        db.Database.EnsureCreated();
+        var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
+        if (pack is null)
+        {
+            Console.WriteLine("The Provided Pack Name Doesn't Exist.");
+            return;
+        }
+        db.Remove(pack);
+        db.SaveChanges();
+    });
+
+    x.AddCommand("extensions", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions) =>
+    {
+        db.Database.EnsureCreated();
+        List<Extension> exts = new();
+
+        foreach (string extension in extensions)
+        {
+            var ext = db.Extensions.FirstOrDefault(x => x.ExtensionName == extension.ToLower());
+            if (ext is null)
+            {
+                Console.WriteLine("Extension {0} Doesn't Exist", extension);
+                return;
+            }
+            exts.Add(ext);
+        }
+        db.RemoveRange(exts);
+        db.SaveChanges();
+
+    });
+
+});
 
 app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packName, [Option('p')] string? newPath, [Option('n')] string? newName, [Option('y')] bool confirm) =>
 {
+    db.Database.EnsureCreated();
     var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
     if (pack is null)
     {
@@ -150,6 +188,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 
 });
+
 app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
