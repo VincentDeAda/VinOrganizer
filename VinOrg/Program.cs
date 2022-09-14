@@ -89,7 +89,7 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packNa
     }
     if (newName is not null)
     {
-        if(db.ExtensionPacks.FirstOrDefault(x=>x.Name==newName)is not null)
+        if (db.ExtensionPacks.FirstOrDefault(x => x.Name == newName) is not null)
         {
             Console.WriteLine("Pack Name Already Used");
             return;
@@ -124,7 +124,32 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packNa
     db.SaveChanges();
 
 });
+app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string> packs, [Argument] string targetPack) =>
+{
+    List<ExtensionPack> extPacks = new();
+    ExtensionPack? target = db.ExtensionPacks.FirstOrDefault(x => x.Name == targetPack);
+    if (target is null)
+    {
+        Console.WriteLine("Target Pack {0} Doesn't Exist");
+        return;
+    }
+    foreach (string pack in packs)
+    {
+        var extPack = db.ExtensionPacks.FirstOrDefault(x => x.Name == pack);
+        if (extPack is null)
+        {
+            Console.WriteLine("Pack {0} Doesn't Exist.", pack);
+            return;
+        }
+        extPacks.Add(extPack);
+    }
+    extPacks.ForEach(x => x.Extensions.ForEach(target.Extensions.Add));
+    db.Update(target);
+    db.RemoveRange(extPacks);
+    db.SaveChanges();
 
+
+});
 app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
@@ -151,7 +176,7 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
                 catch (Exception e)
                 {
 
-                    Console.WriteLine("Failed To Create {0}",newDir);
+                    Console.WriteLine("Failed To Create {0}", newDir);
                     Console.WriteLine("Error Message:\n{0}", e.Message);
                     continue;
                 }
