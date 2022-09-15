@@ -3,6 +3,7 @@ using DataAccess;
 using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 var builder = CoconaApp.CreateBuilder();
@@ -220,19 +221,18 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
                     Console.WriteLine("Error Message:\n{0}", e.Message);
                     continue;
                 }
-
-            ext.ToList().ForEach(x =>
+            foreach (FileInfo file in CollectionsMarshal.AsSpan(ext.ToList()))
             {
                 try
                 {
-                    x.MoveTo(Path.Combine(newDir, x.Name));
+                    file.MoveTo(Path.Combine(newDir, file.Name));
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
-                    Console.WriteLine("Couldn't Move File: {0}", x.FullName);
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine("Couldn't Move File: {0}", file.FullName);
                 }
-            });
+            }
         }
     }
 
