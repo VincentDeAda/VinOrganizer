@@ -190,7 +190,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 });
 
-app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth) =>
+app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
     var files = Directory.GetFiles(currentDir
@@ -206,9 +206,9 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
     foreach (var ext in groupedFiles)
     {
         var packName = db.Extensions.FirstOrDefault(x => x.ExtensionName == ext.Key.Substring(1))?.ExtensionPack;
-        if (packName is not null)
+        if (packName is not null || moveUncategorized)
         {
-            var newDir = Path.Combine(packName.Path ?? currentDir, packName.Name);
+            var newDir = Path.Combine(packName?.Path ?? currentDir, packName?.Name ?? "Uncategorized");
             if (!Directory.Exists(newDir))
                 try
                 {
