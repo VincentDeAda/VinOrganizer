@@ -189,12 +189,13 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 });
 
-app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve) =>
+app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
     var files = Directory.GetFiles(currentDir
                  , "*", new EnumerationOptions()
                  {
+                     MaxRecursionDepth = maxRecursionDepth ?? int.MaxValue,
                      IgnoreInaccessible = true,
                      RecurseSubdirectories = recurisve,
                  }).Select(x => new FileInfo(x)).ToList();
