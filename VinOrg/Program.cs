@@ -16,14 +16,30 @@ app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
 {
     db.Database.EnsureCreated();
 
+    Console.WriteLine(new string('-', Console.WindowWidth));
+    Console.WriteLine("|{0,-20}|{1,5}", "Pack", "Extensions");
+    Console.WriteLine(new string('-', Console.WindowWidth));
     await db.ExtensionPacks.ForEachAsync(x =>
     {
 
-        x.Path ??= "./";
-        Console.WriteLine("{0,-12}{1,5}", x.Name, x.Path);
+
+        Console.Write("|{0,-20}", x.Name);
+        var currentX = Console.GetCursorPosition().Left;
         foreach (var ext in x.Extensions)
-            Console.WriteLine("{0,17}", ext.ExtensionName);
+        {
+            if (currentX + ext.ExtensionName.Length+2 >= Console.WindowWidth)
+            {
+                Console.WriteLine();
+                Console.Write("{0,-21}", " ");
+            }
+            Console.Write("#"+ext.ExtensionName+" ");
+            currentX = Console.GetCursorPosition().Left;
+        }
         Console.WriteLine();
+        if(!string.IsNullOrEmpty(x.Path))
+        Console.WriteLine("|{0}",Path.Combine(x.Path,x.Name));
+        Console.WriteLine(new string('-', Console.WindowWidth));
+
     });
 });
 app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument] string packName) =>
