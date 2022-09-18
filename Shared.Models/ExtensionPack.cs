@@ -1,5 +1,4 @@
 ﻿namespace DataAccess.Models;
-
 public class ExtensionPack
 {
     public int Id { get; set; } = 0;
