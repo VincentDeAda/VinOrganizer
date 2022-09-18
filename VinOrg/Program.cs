@@ -124,6 +124,7 @@ app.AddCommand("setup-common-extensions", ([FromService] SQLiteDatabase db, [Opt
 
 app.AddSubCommand("remove", x =>
 {
+
     x.AddCommand("pack", ([FromService] SQLiteDatabase db, [Argument] string packName) =>
     {
         db.Database.EnsureCreated();
@@ -154,6 +155,7 @@ app.AddSubCommand("remove", x =>
         }
         db.RemoveRange(exts);
         db.SaveChanges();
+
     });
 
 });
@@ -230,7 +232,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 });
 
-app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized) =>
+app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized, [Option('s')] bool silent) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
     var files = Directory.GetFiles(currentDir
@@ -269,6 +271,7 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
                 }
                 catch (Exception e)
                 {
+                    if (silent) continue;
                     Console.WriteLine(e.Message);
                     Console.WriteLine("Couldn't Move File: {0}", file.FullName);
                 }
