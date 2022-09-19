@@ -110,7 +110,7 @@ app.AddCommand("setup-common-extensions", ([FromService] SQLiteDatabase db, [Opt
     var commonExt = new List<ExtensionPack>()
     {
         new (){ Name="Programs", Extensions= stringToExt(new List<string>{"exe", "msi", "jar", "csh", "bat", "reg", "vsix" }) },
-        new (){ Name="Video", Extensions= stringToExt(new List<string>{"mp4", "mkv", "flv", "webm", "vob", "ogv", "drc", "mng", "avi", "ts", "mov", "qt", "wmv", "m4p", "m4v"  }) },
+        new (){ Name="Videos", Extensions= stringToExt(new List<string>{"mp4", "mkv", "flv", "webm", "vob", "ogv", "drc", "mng", "avi", "ts", "mov", "qt", "wmv", "m4p", "m4v"  }) },
         new (){ Name="Images", Extensions= stringToExt(new List<string>{"png", "jpg", "gif", "jpeg", "svg", "webp", "bmp", "ico", "tif"  }) },
         new (){ Name="Compressed", Extensions= stringToExt(new List<string>{"zip", "rar", "7z", "gz", "iso", "tar", "lz", "lz4"  }) },
         new (){ Name="Audio", Extensions= stringToExt(new List<string>{"mp3", "wav", "flac", "acc", "wma", "weba"}) },
@@ -235,6 +235,25 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized, [Option('s')] bool silent) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
+    List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
+        Environment.SpecialFolder.ApplicationData,
+        Environment.SpecialFolder.LocalApplicationData,
+        Environment.SpecialFolder.CommonApplicationData,
+        Environment.SpecialFolder.Windows,
+        Environment.SpecialFolder.System,
+        Environment.SpecialFolder.SystemX86,
+        Environment.SpecialFolder.ProgramFiles,
+        Environment.SpecialFolder.ProgramFilesX86,
+
+    };
+    bool isSystemDir = systemDirs.Any(x => currentDir == Environment.GetFolderPath(x));
+    bool isSystemRoot = Directory.GetDirectoryRoot(Environment.SystemDirectory) == currentDir;
+    if (isSystemDir|| isSystemRoot)
+    {
+        Console.WriteLine("Using The Application Within This Directory Will Cause System Malfunction. Task Aborted.");
+        return;
+    }
+
     var files = Directory.GetFiles(currentDir
                  , "*", new EnumerationOptions()
                  {
