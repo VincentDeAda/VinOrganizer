@@ -232,7 +232,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 });
 
-app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized, [Option('s')] bool silent) =>
+app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized, [Option('s')] bool silent, [Option('a')] bool autoRename) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
     List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
@@ -248,7 +248,7 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
     };
     bool isSystemDir = systemDirs.Any(x => currentDir == Environment.GetFolderPath(x));
     bool isSystemRoot = Directory.GetDirectoryRoot(Environment.SystemDirectory) == currentDir;
-    if (isSystemDir|| isSystemRoot)
+    if (isSystemDir || isSystemRoot)
     {
         Console.WriteLine("Using The Application Within This Directory Will Cause System Malfunction. Task Aborted.");
         return;
@@ -279,9 +279,10 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
                 {
 
                     Console.WriteLine("Failed To Create {0}", newDir);
-                    Console.WriteLine("Error Message:\n{0}", e.Message);
+                    Console.WriteLine("Error Message: {0}", e.Message);
                     continue;
                 }
+            int renamed = 0;
             foreach (FileInfo file in CollectionsMarshal.AsSpan(ext.ToList()))
             {
                 try
@@ -290,11 +291,21 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
                 }
                 catch (Exception e)
                 {
+                    if (autoRename && e is System.IO.IOException)
+                    {
+
+                        file.MoveTo(Path.Combine(newDir, string.Format("{0}-{1}", file.CreationTime.ToString("yyyyMMddHHmmssff"), file.Name)));
+                        renamed++;
+
+
+
+                    }
                     if (silent) continue;
                     Console.WriteLine(e.Message);
                     Console.WriteLine("Couldn't Move File: {0}", file.FullName);
                 }
             }
+            if (autoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
         }
     }
 
