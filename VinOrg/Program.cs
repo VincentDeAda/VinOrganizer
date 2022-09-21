@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using VinOrgCLI.ParameterSets;
 
 var builder = CoconaApp.CreateBuilder();
 builder.Services.AddDbContext<SQLiteDatabase>();
@@ -160,35 +161,35 @@ app.AddSubCommand("remove", x =>
 
 });
 
-app.AddCommand("set", ([FromService] SQLiteDatabase db, [Argument] string packName, [Option('p')] string? newPath, [Option('n')] string? newName, [Option('y')] bool confirm) =>
+app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
 {
     db.Database.EnsureCreated();
-    var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
+    var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == paramSet.PackName);
     if (pack is null)
     {
         Console.WriteLine("The Provided Pack Name Doesn't Exist.");
         return;
     }
-    if (newName is not null)
+    if (paramSet.NewName is not null)
     {
-        if (db.ExtensionPacks.FirstOrDefault(x => x.Name == newName) is not null)
+        if (db.ExtensionPacks.FirstOrDefault(x => x.Name == paramSet.NewName) is not null)
         {
             Console.WriteLine("Pack Name Already Used");
             return;
         }
-        pack.Name = newName;
+        pack.Name = paramSet.NewName;
     }
-    if (newPath is not null)
+    if (paramSet.NewPath is not null)
     {
 
-        bool isValidPath = Path.IsPathFullyQualified(newPath);
+        bool isValidPath = Path.IsPathFullyQualified(paramSet.NewPath);
 
         if (!isValidPath)
             Console.WriteLine("Invalid Path");
         else
         {
-            var absPath = Path.GetFullPath(newPath);
-            if (!confirm)
+            var absPath = Path.GetFullPath(paramSet.NewPath);
+            if (!paramSet.Confirm)
             {
                 Console.Write("Press [Y] to confirm updating the path for {0} to {1}. : ", pack.Name, absPath);
                 var k = Console.ReadKey();
@@ -232,7 +233,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 });
 
-app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option('d')] int? maxRecursionDepth, [Option('c')] bool moveUncategorized, [Option('s')] bool silent, [Option('a')] bool autoRename) =>
+app.Run(([FromService] SQLiteDatabase db,OrganizeParams paramSet) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
     List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
@@ -257,9 +258,9 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
     var files = Directory.GetFiles(currentDir
                  , "*", new EnumerationOptions()
                  {
-                     MaxRecursionDepth = maxRecursionDepth ?? int.MaxValue,
+                     MaxRecursionDepth = paramSet.RecursionDepth ?? int.MaxValue,
                      IgnoreInaccessible = true,
-                     RecurseSubdirectories = recurisve,
+                     RecurseSubdirectories = paramSet.Recursive,
                  }).Select(x => new FileInfo(x)).ToList();
 
     var groupedFiles = files.GroupBy(x => x.Extension.ToLower());
@@ -267,7 +268,7 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
     foreach (var ext in groupedFiles)
     {
         var packName = db.Extensions.FirstOrDefault(x => x.ExtensionName == ext.Key.Substring(1))?.ExtensionPack;
-        if (packName is not null || moveUncategorized)
+        if (packName is not null || paramSet.MoveUncategorized)
         {
             var newDir = Path.Combine(packName?.Path ?? currentDir, packName?.Name ?? "Uncategorized");
             if (!Directory.Exists(newDir))
@@ -291,7 +292,7 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
                 }
                 catch (Exception e)
                 {
-                    if (autoRename && e is System.IO.IOException)
+                    if (paramSet.AutoRename && e is System.IO.IOException)
                     {
 
                         file.MoveTo(Path.Combine(newDir, string.Format("{0}-{1}", file.CreationTime.ToString("yyyyMMddHHmmssff"), file.Name)));
@@ -300,12 +301,12 @@ app.Run(([FromService] SQLiteDatabase db, [Option('r')] bool recurisve, [Option(
 
 
                     }
-                    if (silent) continue;
+                    if (paramSet.SilentMode) continue;
                     Console.WriteLine(e.Message);
                     Console.WriteLine("Couldn't Move File: {0}", file.FullName);
                 }
             }
-            if (autoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
+            if (paramSet.AutoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
         }
     }
 
