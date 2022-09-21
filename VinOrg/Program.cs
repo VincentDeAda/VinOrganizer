@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using VinOrgCLI.ParameterSets;
+using VinOrgCLI.Validation;
 
 var builder = CoconaApp.CreateBuilder();
 builder.Services.AddDbContext<SQLiteDatabase>();
@@ -43,7 +44,7 @@ app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
 
     });
 });
-app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument] string packName) =>
+app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument][IsValidPackName] string packName) =>
 {
     db.Database.EnsureCreated();
 
