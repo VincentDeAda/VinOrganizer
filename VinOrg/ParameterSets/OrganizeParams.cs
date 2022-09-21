@@ -3,18 +3,18 @@ namespace VinOrgCLI.ParameterSets;
 
 internal class OrganizeParams : ICommandParameterSet
 {
-    [Option('s')]
+    [Option('s', Description = "Stop printing any errors or fail messages to the console.")]
     public bool SilentMode { get; set; }
 
-    [Option('r')]
+    [Option('r', Description = "Enables searching for files in sub folders.")]
     public bool Recursive { get; set; }
 
-    [Option('c')]
+    [Option('d', Description = "Specify max recursion depth."),HasDefaultValue]
+    public int? RecursionDepth { get; set; }
+    [Option('c', Description = "Create folder named \"Uncategorized\" that contain any unrecognized file extension.")]
     public bool MoveUncategorized { get; set; }
 
-    [Option('a')]
+    [Option('a', Description = "Automatically rename files that have the same name.")]
     public bool AutoRename { get; set; }
 
-    [Option('d'),HasDefaultValue]
-    public int? RecursionDepth { get; set; }
 }
