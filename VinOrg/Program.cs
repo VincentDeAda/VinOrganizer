@@ -53,7 +53,7 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
     var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x, "[a-z0-9]"));
     if (invalidExtensions.Any())
     {
-        Console.WriteLine("The Following Provided Extensions are Invalid: ");
+        Console.WriteLine("The provided extensions are invalid: ");
         foreach (string ext in invalidExtensions)
             Console.WriteLine(ext);
         return;
@@ -70,7 +70,7 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
     if (existingExtensions.Count > 0)
     {
         existingExtensions.ForEach(x => extensions.Remove(x.ExtensionName));
-        Console.WriteLine("The Following Extensions Already Exist on Other Extension Group:");
+        Console.WriteLine("Some of the provided extensions already exist on other extension groups:");
         existingExtensions.ForEach(x => Console.WriteLine(x.ExtensionName));
         Console.Write("Press [Y] to confirm moving, or any other key to ignore: ");
         var k = Console.ReadKey();
@@ -102,7 +102,7 @@ app.AddCommand("setup-common-extensions", ([FromService] SQLiteDatabase db, [Opt
     if (!confirm)
     {
         Console.WriteLine("This action will erase all current saved extension packs.");
-        Console.Write("Press [Y] To Proceed Further : ");
+        Console.Write("Press [Y] to proceed further : ");
         var k = Console.ReadKey();
         if (k.Key != ConsoleKey.Y)
             return;
@@ -133,7 +133,7 @@ app.AddSubCommand("remove", x =>
         var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
         if (pack is null)
         {
-            Console.WriteLine("The Provided Pack Name Doesn't Exist.");
+            Console.WriteLine("The provided pack name doesn't exist.");
             return;
         }
         db.Remove(pack);
@@ -144,16 +144,11 @@ app.AddSubCommand("remove", x =>
     {
         db.Database.EnsureCreated();
         List<Extension> exts = new();
-
         foreach (string extension in extensions)
         {
             var ext = db.Extensions.FirstOrDefault(x => x.ExtensionName == extension.ToLower());
-            if (ext is null)
-            {
-                Console.WriteLine("Extension {0} Doesn't Exist", extension);
-                return;
-            }
-            exts.Add(ext);
+            if (ext is not null)
+                exts.Add(ext);
         }
         db.RemoveRange(exts);
         db.SaveChanges();
@@ -164,18 +159,23 @@ app.AddSubCommand("remove", x =>
 
 app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
 {
+    if (paramSet.NewPath is null && paramSet.NewName is null)
+    {
+        Console.WriteLine("There's no action requested.");
+        return;
+    }
     db.Database.EnsureCreated();
     var pack = db.ExtensionPacks.FirstOrDefault(x => x.Name == paramSet.PackName);
     if (pack is null)
     {
-        Console.WriteLine("The Provided Pack Name Doesn't Exist.");
+        Console.WriteLine("The provided pack name doesn't exist.");
         return;
     }
     if (paramSet.NewName is not null)
     {
         if (db.ExtensionPacks.FirstOrDefault(x => x.Name == paramSet.NewName) is not null)
         {
-            Console.WriteLine("Pack Name Already Used");
+            Console.WriteLine("Pack name already used");
             return;
         }
         pack.Name = paramSet.NewName;
@@ -214,7 +214,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
     ExtensionPack? target = db.ExtensionPacks.FirstOrDefault(x => x.Name == targetPack);
     if (target is null)
     {
-        Console.WriteLine("Target Pack {0} Doesn't Exist");
+        Console.WriteLine("The provided target Pack \"{0}\" doesn't exist", target);
         return;
     }
     foreach (string pack in packs)
@@ -222,7 +222,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
         var extPack = db.ExtensionPacks.FirstOrDefault(x => x.Name == pack);
         if (extPack is null)
         {
-            Console.WriteLine("Pack {0} Doesn't Exist.", pack);
+            Console.WriteLine("The provided pack \"{0}\" doesn't exist on the database.", pack);
             return;
         }
         extPacks.Add(extPack);
@@ -280,8 +280,8 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
                 catch (Exception e)
                 {
 
-                    Console.WriteLine("Failed To Create {0}", newDir);
-                    Console.WriteLine("Error Message: {0}", e.Message);
+                    Console.WriteLine("Failed to create {0}", newDir);
+                    Console.WriteLine("Error message: {0}", e.Message);
                     continue;
                 }
             int renamed = 0;
@@ -304,7 +304,7 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
                     }
                     if (paramSet.SilentMode) continue;
                     Console.WriteLine(e.Message);
-                    Console.WriteLine("Couldn't Move File: {0}", file.FullName);
+                    Console.WriteLine("Couldn't move file: {0}", file.FullName);
                 }
             }
             if (paramSet.AutoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
