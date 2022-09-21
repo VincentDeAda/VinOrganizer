@@ -43,7 +43,7 @@ app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
         Console.WriteLine(new string('-', Console.WindowWidth));
 
     });
-});
+}).WithDescription("List all extensions packs with their extensions.").WithAliases("ls");
 app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument][IsValidPackName] string packName) =>
 {
     db.Database.EnsureCreated();
@@ -95,7 +95,7 @@ app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> 
     else
         db.Update(pack);
     db.SaveChanges();
-});
+}).WithDescription("Add new extensions to pre-existing or new extension pack.").WithAliases("a");
 
 app.AddCommand("setup-common-extensions", ([FromService] SQLiteDatabase db, [Option('y')] bool confirm) =>
 {
@@ -122,7 +122,7 @@ app.AddCommand("setup-common-extensions", ([FromService] SQLiteDatabase db, [Opt
     db.Database.EnsureCreated();
     db.AddRange(commonExt);
     db.SaveChanges();
-});
+}).WithDescription("Add all known and most used extension types to the database.");
 
 app.AddSubCommand("remove", x =>
 {
@@ -138,7 +138,7 @@ app.AddSubCommand("remove", x =>
         }
         db.Remove(pack);
         db.SaveChanges();
-    });
+    }).WithAliases("p");
 
     x.AddCommand("extensions", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions) =>
     {
@@ -158,9 +158,9 @@ app.AddSubCommand("remove", x =>
         db.RemoveRange(exts);
         db.SaveChanges();
 
-    });
+    }).WithAliases("e");
 
-});
+}).WithDescription("Remove packs or extensions from the database.").WithAliases("r");
 
 app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
 {
@@ -207,7 +207,7 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
     db.Update(pack);
     db.SaveChanges();
 
-});
+}).WithDescription("Update extension pack name or path.").WithAliases("s");
 app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string> packs, [Argument] string targetPack) =>
 {
     List<ExtensionPack> extPacks = new();
@@ -232,9 +232,9 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
     db.RemoveRange(extPacks);
     db.SaveChanges();
 
-});
+}).WithDescription("Merge one or more extension pack to a pre-existing one.").WithAliases("m");
 
-app.Run(([FromService] SQLiteDatabase db,OrganizeParams paramSet) =>
+app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
     List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
