@@ -182,13 +182,6 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
     }
     if (paramSet.NewPath is not null)
     {
-
-        bool isValidPath = Path.IsPathFullyQualified(paramSet.NewPath);
-
-        if (!isValidPath)
-            Console.WriteLine("Invalid Path");
-        else
-        {
             var absPath = Path.GetFullPath(paramSet.NewPath);
             if (!paramSet.Confirm)
             {
@@ -198,12 +191,7 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
                     return;
             }
             pack.Path = absPath;
-        }
-
     }
-
-
-
     db.Update(pack);
     db.SaveChanges();
 
