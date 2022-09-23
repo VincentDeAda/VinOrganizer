@@ -210,7 +210,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
         var extPack = db.ExtensionPacks.FirstOrDefault(x => x.Name == pack);
         if (extPack is null)
         {
-            Console.WriteLine("The provided pack \"{0}\" doesn't exist on the database.", pack);
+            Console.WriteLine("The provided pack \"{0}\" doesn't exist in the database.", pack);
             return;
         }
         extPacks.Add(extPack);
@@ -224,9 +224,7 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 {
-    Console.WriteLine("Run App");
     var currentDir = Directory.GetCurrentDirectory();
-    global::System.Console.WriteLine(currentDir);
     List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
         Environment.SpecialFolder.ApplicationData,
         Environment.SpecialFolder.LocalApplicationData,
@@ -243,7 +241,7 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
     bool isSystemRoot = Directory.GetDirectoryRoot(sysDir) == currentDir;
     if (isSystemDir || isSystemRoot)
     {
-        Console.WriteLine("Using The Application Within This Directory Will Cause System Malfunction. Task Aborted.");
+        Console.WriteLine("Using the application within this directory will cause system malfunction. task aborted.");
         return;
     }
 
