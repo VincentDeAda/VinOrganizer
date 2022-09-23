@@ -182,15 +182,15 @@ app.AddCommand("set", ([FromService] SQLiteDatabase db, SetParams paramSet) =>
     }
     if (paramSet.NewPath is not null)
     {
-            var absPath = Path.GetFullPath(paramSet.NewPath);
-            if (!paramSet.Confirm)
-            {
-                Console.Write("Press [Y] to confirm updating the path for {0} to {1}. : ", pack.Name, absPath);
-                var k = Console.ReadKey();
-                if (k.Key != ConsoleKey.Y)
-                    return;
-            }
-            pack.Path = absPath;
+        var absPath = Path.GetFullPath(paramSet.NewPath);
+        if (!paramSet.Confirm)
+        {
+            Console.Write("Press [Y] to confirm updating the path for {0} to {1}. : ", pack.Name, absPath);
+            var k = Console.ReadKey();
+            if (k.Key != ConsoleKey.Y)
+                return;
+        }
+        pack.Path = absPath;
     }
     db.Update(pack);
     db.SaveChanges();
@@ -224,7 +224,9 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 
 app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 {
+    Console.WriteLine("Run App");
     var currentDir = Directory.GetCurrentDirectory();
+    global::System.Console.WriteLine(currentDir);
     List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
         Environment.SpecialFolder.ApplicationData,
         Environment.SpecialFolder.LocalApplicationData,
@@ -237,7 +239,8 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 
     };
     bool isSystemDir = systemDirs.Any(x => currentDir == Environment.GetFolderPath(x));
-    bool isSystemRoot = Directory.GetDirectoryRoot(Environment.SystemDirectory) == currentDir;
+    string sysDir = string.IsNullOrWhiteSpace(Environment.SystemDirectory) ? "/" : Environment.SystemDirectory;
+    bool isSystemRoot = Directory.GetDirectoryRoot(sysDir) == currentDir;
     if (isSystemDir || isSystemRoot)
     {
         Console.WriteLine("Using The Application Within This Directory Will Cause System Malfunction. Task Aborted.");
