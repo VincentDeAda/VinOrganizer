@@ -3,9 +3,11 @@ using DataAccess;
 using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Models;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using VinOrgCLI.ParameterSets;
+using VinOrgCLI.Utility;
 using VinOrgCLI.Validation;
 
 var builder = CoconaApp.CreateBuilder();
@@ -252,12 +254,15 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
                      IgnoreInaccessible = true,
                      RecurseSubdirectories = paramSet.Recursive,
                  }).Select(x => new FileInfo(x)).ToList();
+    var extensions = db.Extensions.ToList();
+    if (!paramSet.MoveUncategorized)
+        files = files.Where(x => extensions.FirstOrDefault(y => x.Extension.Substring(1).ToLower() == y.ExtensionName) != null).ToList();
 
     var groupedFiles = files.GroupBy(x => x.Extension.ToLower());
-
+    LogManager? changeLogger = paramSet.NoLog ? null : LogManager.CreateLogger();
     foreach (var ext in groupedFiles)
     {
-        var packName = db.Extensions.FirstOrDefault(x => x.ExtensionName == ext.Key.Substring(1))?.ExtensionPack;
+        var packName = db.Extensions.FirstOrDefault(x => x.ExtensionName == ext.Key.Substring(1).ToLower())?.ExtensionPack;
         if (packName is not null || paramSet.MoveUncategorized)
         {
             var newDir = Path.Combine(packName?.Path ?? currentDir, packName?.Name ?? "Uncategorized");
@@ -268,7 +273,6 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
                 }
                 catch (Exception e)
                 {
-
                     Console.WriteLine("Failed to create {0}", newDir);
                     Console.WriteLine("Error message: {0}", e.Message);
                     continue;
@@ -276,9 +280,13 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
             int renamed = 0;
             foreach (FileInfo file in CollectionsMarshal.AsSpan(ext.ToList()))
             {
+                var log = new LogFile();
+                log.From = file.FullName;
                 try
                 {
                     file.MoveTo(Path.Combine(newDir, file.Name));
+                    log.To = file.FullName;
+                    changeLogger?.Log(log);
                 }
                 catch (Exception e)
                 {
@@ -287,15 +295,13 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 
                         file.MoveTo(Path.Combine(newDir, string.Format("{0}-{1}", file.CreationTime.ToString("yyyyMMddHHmmssff"), file.Name)));
                         renamed++;
-
-
-
+                        log.To = file.FullName;
                     }
                     if (paramSet.SilentMode) continue;
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine("Couldn't move file: {0}", file.FullName);
+                    Console.WriteLine("Couldn't move file: {0}. Reason:{1}", file.FullName, e.Message);
                 }
             }
+            
             if (paramSet.AutoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
         }
     }

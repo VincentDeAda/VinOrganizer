@@ -16,5 +16,8 @@ internal class OrganizeParams : ICommandParameterSet
 
     [Option('a', Description = "Automatically rename files that have the same name.")]
     public bool AutoRename { get; set; }
+    
+    [Option('n', Description = "Organize without logging files.")]
+    public bool NoLog { get; set; }
 
 }
