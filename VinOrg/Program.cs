@@ -223,7 +223,47 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
     db.SaveChanges();
 
 }).WithDescription("Merge one or more extension pack to a pre-existing one.").WithAliases("m");
+app.AddCommand("logs", () =>
+{
 
+    Console.WriteLine(new string('-', Console.WindowWidth));
+    Console.WriteLine("|{0,-40}|{1,5}", "Log", "Date");
+    Console.WriteLine(new string('-', Console.WindowWidth));
+    Directory.CreateDirectory(LogManager.ConfigDir);
+    var logs = Directory.GetFiles(LogManager.ConfigDir, "*")
+    .Select(x => new FileInfo(x))
+    .OrderByDescending(x => x.CreationTime);
+    
+    foreach (var log in logs)
+        Console.WriteLine("|{0,-40}|{1,5}", log.Name, log.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"));
+
+    Console.WriteLine(new string('-', Console.WindowWidth));
+
+
+}).WithDescription("Print all log files").WithAliases("l");
+app.AddCommand("undo", ([Argument(Description = "The log name or the first couple unique letters of the log requested.")] string logName) =>
+{
+    var files = Directory.GetFiles(LogManager.ConfigDir, logName + "*");
+    if (files.Any() == false)
+    {
+        Console.WriteLine("The provided log file name doesn't exist.");
+        return;
+    }
+    var logs = LogManager.ReadLog(files.First());
+    foreach (var log in logs)
+    {
+        try
+        {
+            File.Move(log.To, log.From);
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Couldn't move file: {0}. Reason:{1}", log.From, e.Message);
+        }
+    }
+
+}).WithDescription("Undo moving the files that got organized [require log]").WithAliases("u");
 app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 {
     var currentDir = Directory.GetCurrentDirectory();
@@ -305,5 +345,6 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
             if (paramSet.AutoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
         }
     }
+    changeLogger?.DumpLog();
 
 });
