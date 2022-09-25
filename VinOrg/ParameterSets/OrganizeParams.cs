@@ -1,6 +1,4 @@
-﻿using Cocona;
-namespace VinOrgCLI.ParameterSets;
-
+﻿namespace VinOrgCLI.ParameterSets;
 internal class OrganizeParams : ICommandParameterSet
 {
     [Option('s', Description = "Stop printing any errors or fail messages to the console.")]

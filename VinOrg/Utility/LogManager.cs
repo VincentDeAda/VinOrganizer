@@ -1,8 +1,4 @@
-﻿using Shared.Models;
-using System.IO.Compression;
-using System.Security.Cryptography;
-using System.Text.Json;
-namespace VinOrgCLI.Utility;
+﻿namespace VinOrgCLI.Utility;
 internal class LogManager
 {
     public static string ConfigDir

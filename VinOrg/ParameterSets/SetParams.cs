@@ -1,7 +1,4 @@
-﻿using Cocona;
-using VinOrgCLI.Validation;
-
-namespace VinOrgCLI.ParameterSets;
+﻿namespace VinOrgCLI.ParameterSets;
 
 internal class SetParams : ICommandParameterSet
 {

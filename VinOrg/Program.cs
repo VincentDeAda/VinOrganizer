@@ -1,21 +1,6 @@
-﻿using Cocona;
-using DataAccess;
-using DataAccess.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Shared.Models;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using VinOrgCLI.ParameterSets;
-using VinOrgCLI.Utility;
-using VinOrgCLI.Validation;
-
-var builder = CoconaApp.CreateBuilder();
+﻿var builder = CoconaApp.CreateBuilder();
 builder.Services.AddDbContext<SQLiteDatabase>();
 var app = builder.Build();
-
-
-
 app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
 {
     db.Database.EnsureCreated();

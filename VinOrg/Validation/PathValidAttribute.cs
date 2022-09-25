@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace VinOrgCLI.Validation;
+﻿namespace VinOrgCLI.Validation;
 internal class PathValidAttribute :ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)

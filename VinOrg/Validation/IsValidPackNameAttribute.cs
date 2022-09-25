@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
-namespace VinOrgCLI.Validation;
+﻿namespace VinOrgCLI.Validation;
 internal class IsValidPackNameAttribute :ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
