@@ -113,7 +113,29 @@ app.AddCommand("setup-common-extensions", ([FromService] SQLiteDatabase db, [Opt
 
 app.AddSubCommand("remove", x =>
 {
+    x.AddCommand("logs", () =>
+    {
+        Directory.CreateDirectory(LogManager.ConfigDir);
+        var files = Directory.GetFiles(LogManager.ConfigDir);
+        if (files.Any() == false)
+            return;
+        Console.WriteLine("Are you sure you want to delete {0} log file?", files.Length);
+        Console.Write("Press [Y] to confirm the requested action: ");
+        var k = Console.ReadKey();
+        if (k.Key != ConsoleKey.Y)
+            return;
 
+        foreach (var file in files)
+            try
+            {
+                File.Delete(file);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Couldn't delete file: {0}. Reason: {1}",file,e.Message);
+            }
+    }).WithAliases("l");
     x.AddCommand("pack", ([FromService] SQLiteDatabase db, [Argument] string packName) =>
     {
         db.Database.EnsureCreated();
@@ -218,7 +240,7 @@ app.AddCommand("logs", () =>
     var logs = Directory.GetFiles(LogManager.ConfigDir, "*")
     .Select(x => new FileInfo(x))
     .OrderByDescending(x => x.CreationTime);
-    
+
     foreach (var log in logs)
         Console.WriteLine("|{0,-40}|{1,5}", log.Name, log.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"));
 
@@ -326,7 +348,7 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
                     Console.WriteLine("Couldn't move file: {0}. Reason:{1}", file.FullName, e.Message);
                 }
             }
-            
+
             if (paramSet.AutoRename && renamed > 0) Console.WriteLine("{0} Files Renamed.", renamed);
         }
     }
