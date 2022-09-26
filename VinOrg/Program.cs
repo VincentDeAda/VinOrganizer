@@ -1,35 +1,12 @@
 ﻿var builder = CoconaApp.CreateBuilder();
 builder.Services.AddDbContext<SQLiteDatabase>();
 var app = builder.Build();
-app.AddCommand("list", async ([FromService] SQLiteDatabase db) =>
+app.AddCommand("list",  ([FromService] SQLiteDatabase db) =>
 {
     db.Database.EnsureCreated();
 
-    Console.WriteLine(new string('-', Console.WindowWidth));
-    Console.WriteLine("|{0,-20}|{1,5}", "Pack", "Extensions");
-    Console.WriteLine(new string('-', Console.WindowWidth));
-    await db.ExtensionPacks.ForEachAsync(x =>
-    {
-
-
-        Console.Write("|{0,-20}", x.Name);
-        var currentX = Console.GetCursorPosition().Left;
-        foreach (var ext in x.Extensions)
-        {
-            if (currentX + ext.ExtensionName.Length + 2 >= Console.WindowWidth)
-            {
-                Console.WriteLine();
-                Console.Write("{0,-21}", " ");
-            }
-            Console.Write("#" + ext.ExtensionName + " ");
-            currentX = Console.GetCursorPosition().Left;
-        }
-        Console.WriteLine();
-        if (!string.IsNullOrEmpty(x.Path))
-            Console.WriteLine("|{0}", Path.Combine(x.Path, x.Name));
-        Console.WriteLine(new string('-', Console.WindowWidth));
-
-    });
+    var packs = db.ExtensionPacks.ToList();
+	ConsoleHelper.PrintExtensionsPacks(packs);
 }).WithDescription("List all extensions packs with their extensions.").WithAliases("ls");
 app.AddCommand("add", ([FromService] SQLiteDatabase db, [Argument] List<string> extensions, [Argument][IsValidPackName] string packName) =>
 {
@@ -232,19 +209,12 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 }).WithDescription("Merge one or more extension pack to a pre-existing one.").WithAliases("m");
 app.AddCommand("logs", () =>
 {
-
-    Console.WriteLine(new string('-', Console.WindowWidth));
-    Console.WriteLine("|{0,-40}|{1,5}", "Log", "Date");
-    Console.WriteLine(new string('-', Console.WindowWidth));
     Directory.CreateDirectory(LogManager.ConfigDir);
     var logs = Directory.GetFiles(LogManager.ConfigDir, "*")
     .Select(x => new FileInfo(x))
     .OrderByDescending(x => x.CreationTime);
-
-    foreach (var log in logs)
-        Console.WriteLine("|{0,-40}|{1,5}", log.Name, log.CreationTime.ToString("yyyy-MM-dd HH:mm:ss"));
-
-    Console.WriteLine(new string('-', Console.WindowWidth));
+	if (logs.Any())
+		ConsoleHelper.PrintLogs(logs);
 
 
 }).WithDescription("Print all log files").WithAliases("l");
