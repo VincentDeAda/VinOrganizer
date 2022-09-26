@@ -1,7 +1,9 @@
 ﻿namespace VinOrgCLI.ParameterSets;
 internal class OrganizeParams : ICommandParameterSet
 {
-    [Option('s', Description = "Stop printing any errors or fail messages to the console.")]
+	[Option('p',Description ="Path to run the organizing process in."),PathValid]
+	public string? Path { get; set; } =null!;
+	[Option('s', Description = "Stop printing any errors or fail messages to the console.")]
     public bool SilentMode { get; set; }
 
     [Option('r', Description = "Enables searching for files in sub folders.")]

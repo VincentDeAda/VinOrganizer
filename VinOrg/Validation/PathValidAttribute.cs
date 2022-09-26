@@ -5,9 +5,9 @@ internal class PathValidAttribute :ValidationAttribute
     {
         if(value is string path)
         {
-            bool isValid =  Path.IsPathFullyQualified(path);
+			bool isValid = Directory.Exists(path);
             if(isValid) return ValidationResult.Success;
         }
-        return new ValidationResult("Invalid path");
+        return new ValidationResult("The provided path doesn't exist or invalid.");
     }
 }

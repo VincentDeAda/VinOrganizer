@@ -217,7 +217,7 @@ app.AddCommand("logs", () =>
 		ConsoleHelper.PrintLogs(logs);
 
 
-}).WithDescription("Print all log files").WithAliases("l");
+}).WithDescription("Print all log files.").WithAliases("l");
 app.AddCommand("undo", ([Argument(Description = "The log name or the first couple unique letters of the log requested.")] string logName) =>
 {
     var files = Directory.GetFiles(LogManager.ConfigDir, logName + "*");
@@ -240,10 +240,10 @@ app.AddCommand("undo", ([Argument(Description = "The log name or the first coupl
         }
     }
 
-}).WithDescription("Undo moving the files that got organized [require log]").WithAliases("u");
+}).WithDescription("Undo moving the files that got organized [require log].").WithAliases("u");
 app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 {
-    var currentDir = Directory.GetCurrentDirectory();
+    var currentDir = paramSet.Path?? Directory.GetCurrentDirectory();
     List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
         Environment.SpecialFolder.ApplicationData,
         Environment.SpecialFolder.LocalApplicationData,
