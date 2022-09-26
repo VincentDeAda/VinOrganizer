@@ -18,6 +18,9 @@ internal class OrganizeParams : ICommandParameterSet
     public bool AutoRename { get; set; }
     
     [Option('n', Description = "Organize without logging files.")]
-    public bool NoLog { get; set; }
+    public bool NoLog { get; set; } 
+	
+	[Option("steal", Description = "Move the files from the provided path to the current [Require path].")]
+    public bool Steal { get; set; }
 
 }
