@@ -273,13 +273,13 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
                  }).Select(x => new FileInfo(x)).ToList();
     var extensions = db.Extensions.ToList();
     if (!paramSet.MoveUncategorized)
-        files = files.Where(x => extensions.FirstOrDefault(y => x.Extension.Substring(1).ToLower() == y.ExtensionName) != null).ToList();
+        files = files.Where(x => extensions.FirstOrDefault(y =>x.Extension.Length>0?  x.Extension.Substring(1).ToLower() == y.ExtensionName :false) != null).ToList();
 
     var groupedFiles = files.GroupBy(x => x.Extension.ToLower());
     LogManager? changeLogger = paramSet.NoLog ? null : LogManager.CreateLogger();
     foreach (var ext in groupedFiles)
     {
-        var packName = db.Extensions.FirstOrDefault(x => x.ExtensionName == ext.Key.Substring(1).ToLower())?.ExtensionPack;
+        var packName = extensions.FirstOrDefault(x =>ext.Key.Length>0 ? x.ExtensionName == ext.Key.Substring(1).ToLower() : false)?.ExtensionPack;
         if (packName is not null || paramSet.MoveUncategorized)
         {
             var newDir = Path.Combine(packName?.Path ?? currentDir, packName?.Name ?? "Uncategorized");
