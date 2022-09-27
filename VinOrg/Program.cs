@@ -207,13 +207,16 @@ app.AddCommand("merge", ([FromService] SQLiteDatabase db, [Argument] List<string
 	db.SaveChanges();
 
 }).WithDescription("Merge one or more extension pack to a pre-existing one.").WithAliases("m");
-app.AddCommand("logs", () =>
+app.AddCommand("logs", ([Option('d', Description = "List only the ids of the logs.")] bool listOnlyIds) =>
 {
 	Directory.CreateDirectory(LogManager.ConfigDir);
 	var logs = Directory.GetFiles(LogManager.ConfigDir, "*")
 	.Select(x => new FileInfo(x))
 	.OrderByDescending(x => x.CreationTime);
-	if (logs.Any())
+	if (!logs.Any()) return;
+	if (listOnlyIds)
+		logs.ToList().ForEach(x => Console.WriteLine(x.Name));
+	else
 		ConsoleHelper.PrintLogs(logs);
 
 
