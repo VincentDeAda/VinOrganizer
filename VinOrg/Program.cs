@@ -221,21 +221,43 @@ app.AddCommand("logs", ([Option('d', Description = "List only the ids of the log
 
 
 }).WithDescription("Print all log files.").WithAliases("l");
-app.AddCommand("undo", ([Argument(Description = "The log name or the first couple unique letters of the log requested.")] string logName) =>
+app.AddCommand("undo", ([Argument(Description = "The log name or the first couple unique characters of the requested log.")] string? logName, [Option('l', Description = "Automatically pass the most recent log.")] bool useLastLog) =>
 {
-	var files = Directory.GetFiles(LogManager.ConfigDir, logName + "*");
-	if (files.Any() == false)
+	if (useLastLog == false && string.IsNullOrEmpty(logName))
 	{
-		Console.WriteLine("The provided log file name doesn't exist.");
+		Console.WriteLine("No log name provided.");
 		return;
 	}
+	Directory.CreateDirectory(LogManager.ConfigDir);
+	var files = Directory.GetFiles(LogManager.ConfigDir, "*");
+
+	if (!useLastLog)
+	{
+		files = files.Where(x => x.StartsWith(logName!.ToLower())).ToArray();
+		if (files.Any() == false)
+		{
+			Console.WriteLine("The provided log file name doesn't exist.");
+			return;
+		}
+	}
+	else
+	{
+		if (files.Any() == false)
+		{
+			Console.WriteLine("No logs found.");
+			return;
+		}
+	}
+
+
+
 	var logs = LogManager.ReadLog(files.First());
 	foreach (var log in logs)
 	{
 		try
 		{
 			File.Move(log.To, log.From);
-
+			Console.WriteLine(log.From);
 		}
 		catch (Exception e)
 		{
