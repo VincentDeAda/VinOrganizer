@@ -223,45 +223,47 @@ app.AddCommand("logs", ([Option('d', Description = "List only the ids of the log
 }).WithDescription("Print all log files.").WithAliases("l");
 app.AddCommand("undo", ([Argument(Description = "The log name or the first couple unique characters of the requested log.")] string? logName, [Option('l', Description = "Automatically pass the most recent log.")] bool useLastLog) =>
 {
-	if (useLastLog == false && string.IsNullOrEmpty(logName))
+	if(!useLastLog && string.IsNullOrEmpty(logName))
 	{
-		Console.WriteLine("No log name provided.");
+		Console.WriteLine("Error: Argument 'log-name' is required. See '--help' for usage.");
 		return;
 	}
-	Directory.CreateDirectory(LogManager.ConfigDir);
-	var files = Directory.GetFiles(LogManager.ConfigDir, "*");
-
-	if (!useLastLog)
+	string errorMsg;
+	string searchPattern;
+	if (useLastLog)
 	{
-		files = files.Where(x => x.StartsWith(logName!.ToLower())).ToArray();
-		if (files.Any() == false)
-		{
-			Console.WriteLine("The provided log file name doesn't exist.");
-			return;
-		}
+		errorMsg = "No logs found.";
+		searchPattern = "*";
 	}
 	else
 	{
-		if (files.Any() == false)
-		{
-			Console.WriteLine("No logs found.");
-			return;
-		}
+		errorMsg = "The provided log file name doesn't exist.";
+		searchPattern = logName + "*";
 	}
 
 
+	Directory.CreateDirectory(LogManager.ConfigDir);
+	var files = Directory.GetFiles(LogManager.ConfigDir, searchPattern)
+	.Select(x => new FileInfo(x))
+	.OrderByDescending(x => x.CreationTime);
 
-	var logs = LogManager.ReadLog(files.First());
+	if (files.Any() == false)
+	{
+		Console.WriteLine(errorMsg);
+		return;
+	}
+
+	var logs = LogManager.ReadLog(files.First().Name);
 	foreach (var log in logs)
 	{
 		try
 		{
 			File.Move(log.To, log.From);
-			Console.WriteLine(log.From);
+			Console.WriteLine("File: {0}",log.From);
 		}
 		catch (Exception e)
 		{
-			Console.WriteLine("Couldn't move file: {0}. Reason:{1}", log.From, e.Message);
+			Console.WriteLine("Couldn't move file: {0}. Reason: {1}", log.From, e.Message);
 		}
 	}
 
@@ -335,14 +337,16 @@ app.Run(([FromService] SQLiteDatabase db, OrganizeParams paramSet) =>
 					log.To = file.FullName;
 					changeLogger?.Log(log);
 				}
-				catch (Exception e)
+				catch (IOException e)
 				{
-					if (paramSet.AutoRename && e is System.IO.IOException)
+					if (paramSet.AutoRename)
 					{
 
 						file.MoveTo(Path.Combine(newDir, string.Format("{0}-{1}", file.CreationTime.ToString("yyyyMMddHHmmssff") + Random.Shared.Next(1000).ToString(), file.Name)));
 						renamed++;
 						log.To = file.FullName;
+						changeLogger?.Log(log);
+
 					}
 					if (paramSet.SilentMode) continue;
 					Console.WriteLine("Couldn't move file: {0}. Reason:{1}", file.FullName, e.Message);
