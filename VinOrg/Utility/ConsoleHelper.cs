@@ -6,7 +6,7 @@ internal static class ConsoleHelper
 	public static void PrintLogs(IEnumerable<FileInfo> logs)
 	{
 		PrintLine();
-		Console.WriteLine("|{0,-40}|{1,5}", "Log", "Date");
+		Console.WriteLine("|{0,-40}|{1,4}", "Log", "Date");
 		PrintLine();
 
 		foreach (var log in logs)

@@ -1,7 +1,4 @@
-﻿
-
-namespace Shared.Models;
-
+﻿namespace Shared.Models;
 public  class LogFile
 {
     public string From { get; set; }

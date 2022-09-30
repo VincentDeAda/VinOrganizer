@@ -1,5 +1,4 @@
 ﻿namespace VinOrgCLI.ParameterSets;
-
 internal class SetParams : ICommandParameterSet
 {
     [Argument(Description = "The name of the pack requested.")]

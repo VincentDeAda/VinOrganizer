@@ -22,5 +22,4 @@ internal class OrganizeParams : ICommandParameterSet
 
 	[Option("steal", Description = "Move the files from the provided path to the current [Require path].")]
 	public bool Steal { get; set; }
-
 }
