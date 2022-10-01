@@ -26,12 +26,12 @@ internal static class ConsoleHelper
 				var currentX = Console.GetCursorPosition().Left;
 				foreach (var ext in pack.Extensions)
 				{
-					if (currentX + ext.ExtensionName.Length + 2 >= Console.WindowWidth)
+					if (currentX + ext.Length + 2 >= Console.WindowWidth)
 					{
 						Console.WriteLine();
 						Console.Write("{0,-21}", " ");
 					}
-					Console.Write("#" + ext.ExtensionName + " ");
+					Console.Write("#" + ext + " ");
 					currentX = Console.GetCursorPosition().Left;
 				}
 				Console.WriteLine();

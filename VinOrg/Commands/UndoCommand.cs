@@ -23,8 +23,8 @@ internal class UndoCommand
 		}
 
 
-		Directory.CreateDirectory(LogManager.ConfigDir);
-		var files = Directory.GetFiles(LogManager.ConfigDir, searchPattern)
+		Directory.CreateDirectory(LogManager.LogDir);
+		var files = Directory.GetFiles(LogManager.LogDir, searchPattern)
 		.Select(x => new FileInfo(x))
 		.OrderByDescending(x => x.CreationTime);
 

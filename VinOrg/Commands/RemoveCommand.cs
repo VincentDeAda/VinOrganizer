@@ -2,14 +2,14 @@
 internal class RemoveCommand
 {
 
-	private readonly SQLiteDatabase _db;
+	private readonly IExtensionsPacksRepository _db;
 
-	public RemoveCommand(SQLiteDatabase db) => _db = db;
+	public RemoveCommand(IExtensionsPacksRepository db) => _db = db;
 
 	public void Logs()
 	{
-		Directory.CreateDirectory(LogManager.ConfigDir);
-		var files = Directory.GetFiles(LogManager.ConfigDir);
+		Directory.CreateDirectory(LogManager.LogDir);
+		var files = Directory.GetFiles(LogManager.LogDir);
 		if (files.Any() == false)
 			return;
 		Console.WriteLine("Are you sure you want to delete {0} log file?", files.Length);
@@ -33,28 +33,28 @@ internal class RemoveCommand
 	public void Pack([Argument] string packName)
 	{
 
-		_db.Database.EnsureCreated();
+
 		var pack = _db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
 		if (pack is null)
 		{
 			Console.WriteLine("The provided pack name doesn't exist.");
 			return;
 		}
-		_db.Remove(pack);
+		_db.ExtensionPacks.Remove(pack);
 		_db.SaveChanges();
 	}
 
 	public void Extensions([Argument] List<string> extensions)
 	{
-		_db.Database.EnsureCreated();
-		List<Extension> exts = new();
+
+		List<string> exts = new();
 		foreach (string extension in extensions)
 		{
-			var ext = _db.Extensions.FirstOrDefault(x => x.ExtensionName == extension.ToLower());
+			var ext = _db.Extensions.FirstOrDefault(x => x == extension.ToLower());
 			if (ext is not null)
 				exts.Add(ext);
 		}
-		_db.RemoveRange(exts);
+		exts.ForEach(_db.RemoveExtension);
 		_db.SaveChanges();
 	}
 }

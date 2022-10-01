@@ -1,11 +1,11 @@
 ﻿namespace VinOrgCLI.Commands;
 internal class SetCommand
 {
-	private readonly SQLiteDatabase _db;
+	private readonly IExtensionsPacksRepository _db;
 
-	public SetCommand(SQLiteDatabase db) => _db = db;
-	[Command(Aliases = new[] { "s" },Description = "Update extension pack name or path.")]
-	public void Set([FromService] SQLiteDatabase _db, SetParams paramSet)
+	public SetCommand(IExtensionsPacksRepository db) => _db = db;
+	[Command(Aliases = new[] { "s" }, Description = "Update extension pack name or path.")]
+	public void Set(SetParams paramSet)
 	{
 
 		if (paramSet.NewPath is null && paramSet.NewName is null)
@@ -13,7 +13,6 @@ internal class SetCommand
 			Console.WriteLine("There's no action requested.");
 			return;
 		}
-		_db.Database.EnsureCreated();
 		var pack = _db.ExtensionPacks.FirstOrDefault(x => x.Name == paramSet.PackName);
 		if (pack is null)
 		{
@@ -41,7 +40,6 @@ internal class SetCommand
 			}
 			pack.Path = absPath;
 		}
-		_db.Update(pack);
 		_db.SaveChanges();
 	}
 }

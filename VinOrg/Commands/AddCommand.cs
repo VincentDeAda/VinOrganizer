@@ -1,15 +1,12 @@
 ﻿namespace VinOrgCLI.Commands;
 internal class AddCommand
 {
-	private readonly SQLiteDatabase _db;
+	private readonly IExtensionsPacksRepository _db;
 
-	public AddCommand(SQLiteDatabase db) => _db = db;
+	public AddCommand(IExtensionsPacksRepository db) => _db = db;
 	[Command(Aliases = new[] { "a" }, Description = "Add new extensions to pre-existing or new extension pack.")]
 	public void Add([Argument] List<string> extensions, [Argument][IsValidPackName] string packName)
 	{
-		_db.Database.EnsureCreated();
-
-
 		extensions = extensions.Select(x => x.ToLower()).ToList();
 		var invalidExtensions = extensions.Where(x => !Regex.IsMatch(x, "[a-z0-9]"));
 		if (invalidExtensions.Any())
@@ -27,32 +24,34 @@ internal class AddCommand
 			pack = new ExtensionPack { Name = packName };
 			isNew = true;
 		}
-		var existingExtensions = _db.Extensions.Where(x => extensions.Contains(x.ExtensionName) && !pack.Extensions.Contains(x)).ToList();
+		var existingExtensions = _db.Extensions.Where(x => extensions.Contains(x) && !pack.Extensions.Contains(x)).ToList();
 		if (existingExtensions.Count > 0)
 		{
-			existingExtensions.ForEach(x => extensions.Remove(x.ExtensionName));
+			existingExtensions.ForEach(x => extensions.Remove(x));
 			Console.WriteLine("Some of the provided extensions already exist on other extension groups:");
-			existingExtensions.ForEach(x => Console.WriteLine(x.ExtensionName));
+			existingExtensions.ForEach(x => Console.WriteLine(x));
 			Console.Write("Press [Y] to confirm moving, or any other key to ignore: ");
 			var k = Console.ReadKey();
 			if (k.Key == ConsoleKey.Y)
 			{
-				existingExtensions.ForEach(x => x.ExtensionPack = pack);
-				_db.Extensions.UpdateRange(existingExtensions);
+				foreach (string ext in existingExtensions)
+				{
+					var containingPack = _db.ExtensionPacks.First(x => x.Extensions.Contains(ext));
+					containingPack.Extensions.Remove(ext);
+					pack.Extensions.Add(ext); 
+
+				}
+				_db.SaveChanges();
 			}
 
 		}
 
-		foreach (string ext in extensions.Where(x => _db.Extensions.FirstOrDefault(y => y.ExtensionName == x) is null))
+		foreach (string ext in extensions.Where(x => _db.Extensions.FirstOrDefault(y => y == x) is null))
 		{
-			var i = new Extension { ExtensionName = ext, ExtensionPack = pack };
-			pack.Extensions.Add(i);
-			_db.Add(i);
+			pack.Extensions.Add(ext);
 		}
 		if (isNew)
-			_db.Add(pack);
-		else
-			_db.Update(pack);
+			_db.ExtensionPacks.Add(pack);
 		_db.SaveChanges();
 	}
 }

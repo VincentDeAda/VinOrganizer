@@ -1,5 +1,5 @@
-﻿var builder = CoconaLiteApp.CreateBuilder(args);
-builder.Services.AddSingleton<SQLiteDatabase>(new SQLiteDatabase());
+﻿var builder = CoconaLiteApp.CreateBuilder( );
+builder.Services.AddSingleton<IExtensionsPacksRepository>(x=>new JsonDatabase(LogManager.ConfigDir));
 var app = builder.Build();
 app.AddCommands<AddCommand>();
 app.AddCommands<ListCommand>();
