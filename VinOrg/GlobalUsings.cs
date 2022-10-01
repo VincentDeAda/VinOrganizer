@@ -1,4 +1,5 @@
 ﻿global using Cocona;
+global using Cocona.Lite;
 global using DataAccess;
 global using Shared.Models;
 global using System.Text.Json;

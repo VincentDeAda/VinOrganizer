@@ -1,5 +1,5 @@
-﻿var builder = CoconaApp.CreateBuilder(args);
-builder.Services.AddDbContext<SQLiteDatabase>();
+﻿var builder = CoconaLiteApp.CreateBuilder(args);
+builder.Services.AddSingleton<SQLiteDatabase>(new SQLiteDatabase());
 var app = builder.Build();
 app.AddCommands<AddCommand>();
 app.AddCommands<ListCommand>();
