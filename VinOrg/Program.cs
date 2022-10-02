@@ -2,12 +2,14 @@
 builder.Services.AddSingleton<IExtensionsPacksRepository>(x=>new JsonDatabase(LogManager.ConfigDir));
 var app = builder.Build();
 app.AddCommands<AddCommand>();
-app.AddCommands<ListCommand>();
 app.AddCommands<MergeCommand>();
 app.AddCommands<UndoCommand>();
-app.AddCommands<LogsCommand>();
 app.AddCommands<SetupCommand>();
 
+app.AddSubCommand("list", x =>
+{
+	x.AddCommands<ListCommand>();
+}).WithDescription("List extensions or logs.");
 app.AddSubCommand("set", x =>
 {
 	x.AddCommands<SetCommand>();
@@ -16,7 +18,7 @@ app.AddSubCommand("set", x =>
 app.AddSubCommand("remove", x =>
 {
 	x.AddCommands<RemoveCommand>();
-}).WithDescription("Remove An extension, pack and log file.");
+}).WithDescription("Remove An extension, pack or log file.");
 
 
 app.Run<OrgCommand>();
