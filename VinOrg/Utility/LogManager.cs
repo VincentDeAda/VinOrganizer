@@ -14,7 +14,11 @@ internal class LogManager
 	public LogManager()
 	{
 		Directory.CreateDirectory(LogDir);
+	}
 
+	public static List<FileInfo> GetLogFiles(string? logName)
+	{
+		return Directory.GetFiles(LogDir,logName ?? "*").Select(x=>new FileInfo(x)).ToList();
 	}
 	public static IEnumerable<LogFile> ReadLog(string logName)
 	{
