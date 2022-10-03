@@ -8,8 +8,8 @@ internal class RemoveCommand
 
 	public void Logs()
 	{
-		Directory.CreateDirectory(LogManager.LogDir);
-		var files = Directory.GetFiles(LogManager.LogDir);
+		Directory.CreateDirectory(Paths.LogDir);
+		var files = Directory.GetFiles(Paths.LogDir);
 		if (files.Any() == false)
 			return;
 		Console.WriteLine("Are you sure you want to delete {0} log file?", files.Length);

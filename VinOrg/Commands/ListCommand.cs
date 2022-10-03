@@ -15,7 +15,7 @@ internal class ListCommand
 	[Command(Aliases = new[] { "l" }, Description = "Print all log files.")]
 	public void Logs([Option('d', Description = "List only the ids of the logs.")] bool listOnlyIds)
 	{
-		Directory.CreateDirectory(LogManager.LogDir);
+		Directory.CreateDirectory(Paths.LogDir);
 		var logs = LogManager.GetLogFiles();
 		if (!logs.Any()) return;
 		if (listOnlyIds)

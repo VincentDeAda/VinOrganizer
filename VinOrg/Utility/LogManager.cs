@@ -1,28 +1,21 @@
 ﻿namespace VinOrgCLI.Utility;
 internal class LogManager
 {
-	public static string ConfigDir
-	{
-		get => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VDA", "VinOrg");
-	}
-	public static string LogDir
-	{
-		get => Path.Combine(ConfigDir, "Logs");
-	}
+
 	private readonly List<LogFile> _logs = new();
 	public static LogManager CreateLogger() => new LogManager();
 	public LogManager()
 	{
-		Directory.CreateDirectory(LogDir);
+		Directory.CreateDirectory(Paths.LogDir);
 	}
 
 	public static List<FileInfo> GetLogFiles(string? logName=null)
 	{
-		return Directory.GetFiles(LogDir,logName ?? "*").Select(x=>new FileInfo(x)).OrderByDescending(x=>x.CreationTime).ToList();
+		return Directory.GetFiles(Paths.LogDir,logName ?? "*").Select(x=>new FileInfo(x)).OrderByDescending(x=>x.CreationTime).ToList();
 	}
 	public static IEnumerable<LogFile> ReadLog(string logName)
 	{
-		using (var stream = File.Open(Path.Combine(LogDir, logName), FileMode.Open))
+		using (var stream = File.Open(Path.Combine(Paths.LogDir, logName), FileMode.Open))
 		using (GZipStream zipStream = new(stream, CompressionMode.Decompress))
 			return JsonSerializer.Deserialize<List<LogFile>>(zipStream)!;
 	}
@@ -46,7 +39,7 @@ internal class LogManager
 
 			using (var md5 = MD5.Create())
 				md5String = BitConverter.ToString(md5.ComputeHash(ms)).ToLower().Replace("-", null);
-			using (var fs = File.Create(Path.Combine(LogDir, md5String), (int)ms.Length))
+			using (var fs = File.Create(Path.Combine(Paths.LogDir, md5String), (int)ms.Length))
 			{
 				ms.Position = 0;
 				ms.CopyTo(fs);
