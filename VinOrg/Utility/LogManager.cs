@@ -16,9 +16,9 @@ internal class LogManager
 		Directory.CreateDirectory(LogDir);
 	}
 
-	public static List<FileInfo> GetLogFiles(string? logName)
+	public static List<FileInfo> GetLogFiles(string? logName=null)
 	{
-		return Directory.GetFiles(LogDir,logName ?? "*").Select(x=>new FileInfo(x)).ToList();
+		return Directory.GetFiles(LogDir,logName ?? "*").Select(x=>new FileInfo(x)).OrderByDescending(x=>x.CreationTime).ToList();
 	}
 	public static IEnumerable<LogFile> ReadLog(string logName)
 	{
@@ -35,8 +35,8 @@ internal class LogManager
 	}
 	public void DumpLog()
 	{
-		string md5String;
 		if (_logs.Count == 0) return;
+		string md5String;
 		using (MemoryStream ms = new MemoryStream())
 		{
 			using (GZipStream gzip = new(ms, CompressionLevel.SmallestSize, true))

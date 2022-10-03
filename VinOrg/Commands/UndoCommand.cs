@@ -17,7 +17,7 @@ internal class UndoCommand
             Console.WriteLine("There's more than one file that start with the provided log name. please include more letters.");
             return;
         }
-        var log = logs.OrderByDescending(x=>x.CreationTime).First();
+        var log = logs.First();
         var logInfo = LogManager.ReadLog(log.Name);
 
 

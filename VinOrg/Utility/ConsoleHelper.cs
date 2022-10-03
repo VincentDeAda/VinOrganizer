@@ -14,6 +14,12 @@ internal static class ConsoleHelper
 		PrintLine();
 
 	}
+	public static bool ConfirmAction()
+	{
+		Console.WriteLine("Please press [Y] to confirm or any other key to cancel. ");
+		var key = Console.ReadKey();
+		return  key.Key == ConsoleKey.Y;
+	}
 	public static void PrintExtensionsPacks(IEnumerable<ExtensionPack> packs)
 	{
 		PrintLine();

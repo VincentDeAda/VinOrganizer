@@ -30,9 +30,9 @@ internal class AddCommand
 			existingExtensions.ForEach(x => extensions.Remove(x));
 			Console.WriteLine("Some of the provided extensions already exist on other extension groups:");
 			existingExtensions.ForEach(x => Console.WriteLine(x));
-			Console.Write("Press [Y] to confirm moving, or any other key to ignore: ");
-			var k = Console.ReadKey();
-			if (k.Key == ConsoleKey.Y)
+			Console.WriteLine("Do you want to move to extensions to {0}",pack.Name);
+			var confirm = ConsoleHelper.ConfirmAction();
+			if (confirm)
 			{
 				foreach (string ext in existingExtensions)
 				{

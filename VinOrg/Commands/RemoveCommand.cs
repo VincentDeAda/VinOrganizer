@@ -13,9 +13,8 @@ internal class RemoveCommand
 		if (files.Any() == false)
 			return;
 		Console.WriteLine("Are you sure you want to delete {0} log file?", files.Length);
-		Console.Write("Press [Y] to confirm the requested action: ");
-		var k = Console.ReadKey();
-		if (k.Key != ConsoleKey.Y)
+		var confirm = ConsoleHelper.ConfirmAction();
+		if (confirm != true)
 			return;
 
 		foreach (var file in files)
