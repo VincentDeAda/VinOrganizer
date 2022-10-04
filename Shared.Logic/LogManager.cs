@@ -1,5 +1,11 @@
-﻿namespace VinOrgCLI.Utility;
-internal class LogManager
+﻿using Shared.Models;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text.Json;
+
+namespace Shared.Logic;
+
+public class LogManager
 {
 
 	private readonly List<LogFile> _logs = new();

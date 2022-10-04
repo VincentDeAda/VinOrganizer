@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+		<ProjectReference Include="..\Shared.Logic\Shared.Logic.csproj" />
 	</ItemGroup>
 
 </Project>

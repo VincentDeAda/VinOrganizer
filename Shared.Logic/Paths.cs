@@ -1,4 +1,4 @@
-﻿namespace VinOrgCLI.Utility;
+﻿namespace Shared.Logic;
 public static class Paths
 {
     public static string ConfigDir
