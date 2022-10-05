@@ -16,42 +16,6 @@ internal class AddCommand
 				Console.WriteLine(ext);
 			return;
 		}
-
-		var pack = _db.ExtensionPacks.FirstOrDefault(x => x.Name == packName);
-		bool isNew = false;
-		if (pack is null)
-		{
-			pack = new ExtensionPack { Name = packName };
-			isNew = true;
-		}
-		var existingExtensions = _db.Extensions.Where(x => extensions.Contains(x) && !pack.Extensions.Contains(x)).ToList();
-		if (existingExtensions.Count > 0)
-		{
-			existingExtensions.ForEach(x => extensions.Remove(x));
-			Console.WriteLine("Some of the provided extensions already exist on other extension groups:");
-			existingExtensions.ForEach(x => Console.WriteLine(x));
-			Console.WriteLine("Do you want to move to extensions to {0}",pack.Name);
-			var confirm = ConsoleHelper.ConfirmAction();
-			if (confirm)
-			{
-				foreach (string ext in existingExtensions)
-				{
-					var containingPack = _db.ExtensionPacks.First(x => x.Extensions.Contains(ext));
-					containingPack.Extensions.Remove(ext);
-					pack.Extensions.Add(ext); 
-
-				}
-				_db.SaveChanges();
-			}
-
-		}
-
-		foreach (string ext in extensions.Where(x => _db.Extensions.FirstOrDefault(y => y == x) is null))
-		{
-			pack.Extensions.Add(ext);
-		}
-		if (isNew)
-			_db.ExtensionPacks.Add(pack);
-		_db.SaveChanges();
+		_db.Add(extensions, packName);
 	}
 }
