@@ -6,14 +6,7 @@ using System.Runtime.InteropServices;
 namespace Shared.Logic;
 public static class OrgLogic
 {
-	public class OrganizeResult
-	{
-		public int FileMoved { get; set; }
-		public int FailedToCreateDir { get; set; }
-		public int FailedToMove { get; set; }
-		public int Renamed { get; set; }
-	}
-	public static OrganizeResult? Organize(this IExtensionsPacksRepository db, string? path, int? recursionDepth, bool steal, bool recursive, bool moveUncategorized, bool noLog, bool autoRename, bool silentMode)
+	public static OrganizeResult? Organize(this IExtensionsPacksRepository db, string? path, int? recursionDepth, bool steal, bool recursive, bool moveUncategorized, bool noLog, bool autoRename)
 	{
 		var result = new OrganizeResult();
 		var currentDir = Directory.GetCurrentDirectory();

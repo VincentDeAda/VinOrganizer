@@ -3,9 +3,6 @@ internal class OrganizeParams : ICommandParameterSet
 {
 	[Option('p', Description = "Path to run the organizing process in."), PathValid, HasDefaultValue]
 	public string? Path { get; set; } = null!;
-	[Option('s', Description = "Stop printing any errors or fail messages to the console.")]
-	public bool SilentMode { get; set; }
-
 	[Option('r', Description = "Enables searching for files in sub folders.")]
 	public bool Recursive { get; set; }
 
@@ -20,6 +17,6 @@ internal class OrganizeParams : ICommandParameterSet
 	[Option('n', Description = "Organize without logging files.")]
 	public bool NoLog { get; set; }
 
-	[Option("steal", Description = "Move the files from the provided path to the current [Require path].")]
+	[Option('s',Description = "Move the files from the provided path to the current [Require path].")]
 	public bool Steal { get; set; }
 }
