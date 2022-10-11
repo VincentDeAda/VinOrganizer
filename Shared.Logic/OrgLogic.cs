@@ -21,9 +21,7 @@ public static class OrgLogic
 
     var files = GetFiles(lookupFolder, recursive, recursionDepth);
         progressTracker?.SetMax(files.Count);
-    //
-    if (moveUncategorized)
-      files = files.Where(x => db.Extensions.FirstOrDefault(y => x.Extension.Length > 0 ? x.Extension.Substring(1).ToLower() == y : false) != null).ToList();
+  
 
     //Grouping the files by their extension
     var groupedFiles = files.GroupBy(x => x.Extension.ToLower());
