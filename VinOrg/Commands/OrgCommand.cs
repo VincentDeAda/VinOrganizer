@@ -7,7 +7,7 @@ internal class OrgCommand
 	[PrimaryCommand]
 	public void Organize(OrganizeParams paramSet)
 	{
-		var res = _db.Organize(paramSet.Path, paramSet.RecursionDepth, paramSet.Steal, paramSet.Recursive, paramSet.MoveUncategorized, paramSet.AutoRename, paramSet.NoLog);
+		var res = _db.Organize(paramSet.Path, paramSet.RecursionDepth, paramSet.Steal, paramSet.Recursive, paramSet.MoveUncategorized, paramSet.AutoRename, paramSet.NoLog, new ConsoleProgressStatus());
 		if (res is null)
 			Console.WriteLine("Using the application within this directory will cause system malfunction. task aborted.");
 		else
