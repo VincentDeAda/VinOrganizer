@@ -1,5 +1,6 @@
 ﻿var builder = CoconaLiteApp.CreateBuilder( );
 builder.Services.AddSingleton<IExtensionsPacksRepository>(x=>new JsonDatabase(Paths.ConfigDir));
+builder.Services.AddSingleton<IProgressTracker,ConsoleProgressStatus>();
 var app = builder.Build();
 app.AddCommands<AddCommand>();
 app.AddCommands<MergeCommand>();
