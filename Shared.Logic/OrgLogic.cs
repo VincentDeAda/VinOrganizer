@@ -6,20 +6,20 @@ using System.Runtime.InteropServices;
 namespace Shared.Logic;
 public static class OrgLogic
 {
-  public static OrganizeResult? Organize(this IExtensionsPacksRepository db, string? path, int? recursionDepth, bool steal, bool recursive, bool moveUncategorized, bool noLog, bool autoRename, IProgressTracker? progressTracker = null)
+  public static OrganizeResult? Organize(this IExtensionsPacksRepository db, OrganizeParamsBase paramSet, IProgressTracker? progressTracker = null)
   {
     var result = new OrganizeResult();
     var currentDir = Directory.GetCurrentDirectory();
 
-    string lookupFolder = path ?? currentDir;
-    string targetFolder = steal ? currentDir : lookupFolder;
+    string lookupFolder = paramSet.Path ?? currentDir;
+    string targetFolder = paramSet.Steal ? currentDir : lookupFolder;
 
     //Checking if dir is not dangerous dir.
     if (IsBadDir(currentDir, lookupFolder))
       return null;
 
 
-    var files = GetFiles(lookupFolder, recursive, recursionDepth);
+    var files = GetFiles(lookupFolder, paramSet.Recursive, paramSet.RecursionDepth);
         progressTracker?.SetMax(files.Count);
   
 
@@ -31,7 +31,7 @@ public static class OrgLogic
     //Creating The Logger
     LogManager? changeLogger;
 
-    if (noLog)
+    if (paramSet.NoLog)
       changeLogger = null;
     else
       changeLogger = LogManager.CreateLogger();
@@ -46,7 +46,7 @@ public static class OrgLogic
         pack = db.ExtensionPacks.FirstOrDefault(x => x.Extensions.Contains(ext.Key[1..].ToLower()));
 
       //If the extension doesn't exist on the db ignore it.
-      if (pack is null && moveUncategorized == false)
+      if (pack is null && paramSet.MoveUncategorized == false)
         continue;
 
       //Assigning the path to either the pack custom path or the target folder with checking if 
@@ -74,7 +74,7 @@ public static class OrgLogic
         }
         catch (Exception)
         {
-          if (autoRename)
+          if (paramSet.AutoRename)
           {
             file.MoveTo(Path.Combine(extPackDir, string.Format("{1}-{0}", file.CreationTime.ToString("yyyyMMddHHmmssff") + Random.Shared.Next(1000).ToString(), file.Name)));
             log.To = file.FullName;
