@@ -17,7 +17,7 @@ internal class OrgCommand
 			Console.WriteLine("Using the application within this directory will cause system malfunction. task aborted.");
 		else
 		{
-			Console.WriteLine("Summary\nFiles Moved: {0}.\nFiles Renamed: {1}\nFiles Failed To Move: {2}.\nDirectory Failed To Create: {3}.", res.FileMoved, res.Renamed, res.FailedToMove, res.FailedToCreateDir);
+			Console.WriteLine("Summary\n{0} File  Moved.\n{1} File Renamed.\n{2} File Failed To Move.\n{3} Directory Failed To Create.", res.FileMoved, res.Renamed, res.FailedToMove, res.FailedToCreateDir);
 		}
 
 	}

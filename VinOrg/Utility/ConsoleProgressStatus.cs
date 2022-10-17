@@ -27,7 +27,7 @@ internal class ConsoleProgressStatus : IProgressTracker
 	{
 		var pos = Console.GetCursorPosition();
 		Console.WriteLine("Progress: {0}", GetPercentage());
-		Console.WriteLine("Total File iterated: {0}/{1}", Current, Max);
+		Console.WriteLine("Total Files iterated: {0}/{1}", Current, Max);
 		Console.WriteLine();
 		if (Current != Max)
 			Console.SetCursorPosition(pos.Left, pos.Top);
