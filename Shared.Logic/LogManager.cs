@@ -32,9 +32,9 @@ public class LogManager
 		if (file.From == file.To) return;
 		_logs.Add(file);
 	}
-	public void DumpLog()
+	public string? DumpLog()
 	{
-		if (_logs.Count == 0) return;
+		if (_logs.Count == 0) return null;
 		string md5String;
 		using (MemoryStream ms = new MemoryStream())
 		{
@@ -51,6 +51,6 @@ public class LogManager
 				ms.CopyTo(fs);
 			}
 		}
-		Console.WriteLine(md5String);
+		return md5String;
 	}
 }

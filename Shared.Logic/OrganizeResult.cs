@@ -5,4 +5,5 @@ public class OrganizeResult
 	public int FailedToCreateDir { get; set; }
 	public int FailedToMove { get; set; }
 	public int Renamed { get; set; }
+	public string? LogMD5 { get; set; }
 }

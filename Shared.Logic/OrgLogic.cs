@@ -101,7 +101,7 @@ public static class OrgLogic
 				progressTracker?.Increament(1);
 			}
 		}
-		changeLogger?.DumpLog();
+		result.LogMD5 = changeLogger?.DumpLog();
 		return result;
 	}
 
