@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Shared.Logic;
 
-public class LogManager
+public class LogManager : ILogManager
 {
 
 	private readonly List<LogFile> _logs = new();
@@ -15,9 +15,9 @@ public class LogManager
 		Directory.CreateDirectory(Paths.LogDir);
 	}
 
-	public static List<FileInfo> GetLogFiles(string? logName=null)
+	public static List<FileInfo> GetLogFiles(string? logName = null)
 	{
-		return Directory.GetFiles(Paths.LogDir,logName ?? "*").Select(x=>new FileInfo(x)).OrderByDescending(x=>x.CreationTime).ToList();
+		return Directory.GetFiles(Paths.LogDir, logName ?? "*").Select(x => new FileInfo(x)).OrderByDescending(x => x.CreationTime).ToList();
 	}
 	public static IEnumerable<LogFile> ReadLog(string logName)
 	{
