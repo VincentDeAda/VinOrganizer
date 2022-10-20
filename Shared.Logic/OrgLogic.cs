@@ -21,9 +21,12 @@ public static class OrgLogic
 
 		var files = GetFiles(lookupFolder, paramSet.Recursive, paramSet.RecursionDepth);
 
+		var duplicates = new Dictionary<string, int>();
 
 		//Grouping the files by their extension
 		var groupedFiles = files.GroupBy(x => x.Extension.ToLower()).ToList();
+
+
 		if (paramSet.MoveUncategorized == false)
 		{
 			int fileCount = groupedFiles
@@ -85,7 +88,15 @@ public static class OrgLogic
 				{
 					if (paramSet.AutoRename)
 					{
-						file.MoveTo(Path.Combine(extPackDir, string.Format("{1}-{0}", file.CreationTime.ToString("yyyyMMddHHmmssff") + Random.Shared.Next(1000).ToString(), file.Name)));
+
+						string renamedFileName;
+						int attemptsRenamed = 0;
+						do
+						{
+							renamedFileName = file.Name.Insert(file.Name.LastIndexOf('.'), "_" + attemptsRenamed);
+						} while (File.Exists(Path.Combine(extPackDir, renamedFileName)));
+						var path = Path.Combine(extPackDir, renamedFileName);
+						file.MoveTo(path);
 						log.To = file.FullName;
 						result.Renamed++;
 						result.FileMoved++;
