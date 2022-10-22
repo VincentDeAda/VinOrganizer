@@ -3,16 +3,19 @@ internal class OrgCommand
 {
 	private readonly IExtensionsPacksRepository _db;
 	private readonly IProgressTracker _progressTracker;
-	public OrgCommand(IExtensionsPacksRepository db, IProgressTracker progressTracker)
+	private readonly ILogManager _logManager;
+
+	public OrgCommand(IExtensionsPacksRepository db, IProgressTracker progressTracker,ILogManager logManager)
 	{
 		_db = db;
 		_progressTracker = progressTracker;
+		_logManager = logManager;
 	}
 
 	[PrimaryCommand]
 	public void Organize(OrganizeParams paramSet)
 	{
-		var res = _db.Organize(paramSet, _progressTracker);
+		var res = _db.Organize(paramSet, _progressTracker,_logManager);
 		if (res is null)
 			Console.WriteLine("Using the application within this directory will cause system malfunction. task aborted.");
 		else

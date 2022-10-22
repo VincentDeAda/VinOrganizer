@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace Shared.Logic;
 public static class OrgLogic
 {
-	public static OrganizeResult? Organize(this IExtensionsPacksRepository db, OrganizeParamsBase paramSet, IProgressTracker? progressTracker = null)
+	public static OrganizeResult? Organize(this IExtensionsPacksRepository db, OrganizeParamsBase paramSet, IProgressTracker? progressTracker = null, ILogManager? logger = null)
 	{
 		var result = new OrganizeResult();
 		var currentDir = Directory.GetCurrentDirectory();
@@ -41,12 +41,7 @@ public static class OrgLogic
 
 
 		//Creating The Logger
-		LogManager? changeLogger;
-
-		if (paramSet.NoLog)
-			changeLogger = null;
-		else
-			changeLogger = LogManager.CreateLogger();
+	
 
 		foreach (var ext in groupedFiles)
 		{
@@ -108,11 +103,11 @@ public static class OrgLogic
 					}
 				}
 
-				changeLogger?.Log(log);
+				logger?.Log(log);
 				progressTracker?.Increament(1);
 			}
 		}
-		result.LogMD5 = changeLogger?.DumpLog();
+		result.LogMD5 = logger?.DumpLog();
 		return result;
 	}
 
