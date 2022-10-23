@@ -1,7 +1,7 @@
 ﻿var builder = CoconaLiteApp.CreateBuilder();
-builder.Services.AddSingleton<IExtensionsPacksRepository>(x=>new JsonDatabase(Paths.ConfigDir));
-builder.Services.AddSingleton<IProgressTracker,ConsoleProgressStatus>();
-builder.Services.AddSingleton<ILogManager, LogManager>();
+builder.Services.AddSingleton<IExtensionsPacksRepository>(x => new JsonDatabase(Paths.ConfigDir));
+builder.Services.AddSingleton<ILogManager>(x => new LogManager(Paths.LogDir));
+builder.Services.AddSingleton<IProgressTracker, ConsoleProgressStatus>();
 var app = builder.Build();
 app.AddCommands<AddCommand>();
 app.AddCommands<MergeCommand>();
@@ -12,6 +12,7 @@ app.AddSubCommand("list", x =>
 {
 	x.AddCommands<ListCommand>();
 }).WithDescription("List extensions or logs.");
+
 app.AddSubCommand("set", x =>
 {
 	x.AddCommands<SetCommand>();

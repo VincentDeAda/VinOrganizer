@@ -7,21 +7,24 @@ namespace Shared.Logic;
 
 public class LogManager : ILogManager
 {
+	private readonly string _logDir;
+
+	public LogManager(string logDir)
+	{
+		_logDir = logDir;
+		Directory.CreateDirectory(_logDir);
+
+	}
 
 	private readonly List<LogFile> _logs = new();
-	public static LogManager CreateLogger() => new LogManager();
-	public LogManager()
+	
+	public  List<FileInfo> GetLogFiles(string? logName = null)
 	{
-		Directory.CreateDirectory(Paths.LogDir);
+		return Directory.GetFiles(_logDir, logName ?? "*").Select(x => new FileInfo(x)).OrderByDescending(x => x.CreationTime).ToList();
 	}
-
-	public static List<FileInfo> GetLogFiles(string? logName = null)
+	public  IEnumerable<LogFile> ReadLog(string logName)
 	{
-		return Directory.GetFiles(Paths.LogDir, logName ?? "*").Select(x => new FileInfo(x)).OrderByDescending(x => x.CreationTime).ToList();
-	}
-	public static IEnumerable<LogFile> ReadLog(string logName)
-	{
-		using (var stream = File.Open(Path.Combine(Paths.LogDir, logName), FileMode.Open))
+		using (var stream = File.Open(Path.Combine(_logDir, logName), FileMode.Open))
 		using (GZipStream zipStream = new(stream, CompressionMode.Decompress))
 			return JsonSerializer.Deserialize<List<LogFile>>(zipStream)!;
 	}
@@ -45,7 +48,7 @@ public class LogManager : ILogManager
 
 			using (var md5 = MD5.Create())
 				md5String = BitConverter.ToString(md5.ComputeHash(ms)).ToLower().Replace("-", null);
-			using (var fs = File.Create(Path.Combine(Paths.LogDir, md5String), (int)ms.Length))
+			using (var fs = File.Create(Path.Combine(_logDir, md5String), (int)ms.Length))
 			{
 				ms.Position = 0;
 				ms.CopyTo(fs);

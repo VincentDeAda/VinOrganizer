@@ -123,7 +123,7 @@ public static class OrgLogic
 	}
 	private static bool IsBadDir(string currentDir, string lookupFolder)
 	{
-		List<Environment.SpecialFolder> systemDirs = new List<Environment.SpecialFolder>() {
+		List<Environment.SpecialFolder> systemDirs = new() {
 	Environment.SpecialFolder.ApplicationData,
 	Environment.SpecialFolder.LocalApplicationData,
 	Environment.SpecialFolder.CommonApplicationData,
